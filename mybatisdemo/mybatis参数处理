@@ -1,0 +1,57 @@
+单个参数：mybatis不会做特殊处理，
+	#{参数名}：取出参数值。
+多个参数：mybatis会做特殊处理
+	多个参数会被封装成一个map，
+		key：param1...paramN，或者索引也可以
+		value：传入的参数值
+	#{}就是从map中获取指定的key的值；
+
+
+命名参数：明确指定封装参数时map的key；@Param("id")
+	例如：public Employee getEmpByIdAndLastName(@Param("id")Integer id,@Param("lastName")String lastName);
+	多个参数会被封装成一个map，
+		key：使用@Param注解指定的值
+		value：参数值
+	#{指定key}取出对应的参数值
+	
+POJO
+如果多个参数的话可以传入POJO数据模型  #{属性名}：取出传入的值
+
+Map 也可以传入Map  #{key}：取出map中对应的值
+
+TO:
+如果多个参数不是业务模型中的参数，但经常使用，推荐编写一个TO(Transfer Object) 数据传输对象
+Page{
+	int index;
+	int size;
+}
+
+特别注意：如果是Collection(List、Set)类型或者数组，
+		也会是把传入的list或者数组封装在map中。
+			key：Collection(collection),如果是List还可以使用这个key(list)
+				数组(array)
+public Employee getEmpById(List<Integer> ids);
+		取值：取出第一个id的值：#{list[0]}
+		
+		
+#{}和${}区别：
+		#{}:是以预编译的形式，将参数设置到sql语句中；PreparedStatement;防止sql注入
+		${}:取出的值直接拼接在sql中；会有安全问题
+		大多数情况都应该使用#{};
+		如果需要占位符使用${}
+		
+#{}:更丰富的用法
+	规定参数的一些规则：
+	javaType、jdbcType、mode(存储过程)、numericScale(规定保留几位小数)、
+	resultMap(返回类型)、typeHandler(类型处理器)、jdbcTypeName、expression(未来准备支持的功能);
+	
+	javaType通常需要在某种特定的条件下设置：
+		在我们数据为null的时候，有些数据库可能不识别mybatis对null的默认处理。比如Oracle(报错)
+		javaType OTHER:无效的类型：
+			因为mybatis对所有的都映射的是原生jdbc的OTHER;
+			
+		由全局配置:jdbcTypeForNull=OTHER;Oracle不支持；两种办法都行
+		1、#{email,jdbcType=OTHER};
+		2、jdbcTypeForNull=NULL
+		
+		

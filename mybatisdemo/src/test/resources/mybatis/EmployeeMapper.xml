@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.mybatis.dao.EnployeeMapper">
+<!-- 
+namespace:名字空间
+id:唯一标识符
+resultType:返回值类型
+#{id}:从传过来的参数中获取值
+ -->
+ 	<!-- public Map<Integer,Employee> getEmpByLastNameLikeReturnMap(String lastName); -->
+ 	<select id="getEmpByLastNameLikeReturnMap" resultType="employee" databaseId="mysql">
+		select * from tbl_employee where last_name like #{lastName}
+	</select>
+ 	
+ 	<!-- public Map<String,Object> getEmpByIdReturnMap(Integer id); -->
+ 	<select id="getEmpByIdReturnMap" resultType="map" databaseId="mysql">
+		select * from tbl_employee where id = #{id}
+	</select>
+ 
+ 	<!-- public List<Employee> getEmpsByLastNameLike(String lastName); -->
+	<select id="getEmpsByLastNameLike" resultType="employee" databaseId="mysql">
+		select * from tbl_employee where last_name like #{lastName}
+	</select>
+	
+	<select id="getEmpById" resultType="employee" databaseId="mysql">
+		select * from tbl_employee where id = #{id}
+	</select>
+	
+	<select id="getEmpById" resultType="employee" databaseId="oracle">
+		select * from tbl_employee where id = #{id}
+	</select>
+	
+	<!-- public void addEmp(Employee employee); -->
+	<!-- parameterType:可以省略 -->
+	<!-- mysql支持自动自增主键，自增主键值的获取，mybatis也是利用statement.getGenreatedKeys();
+		useGeneratedKeys="true";使用自增主键值策略
+		keyProperty:指定对应的主键属性，也就是mybatis获取到主键值以后，将这个值封装给javaBean的哪个属性      
+	 -->
+	<insert id="addEmp" parameterType="com.atguigu.mybatis.bean.Employee"
+		useGeneratedKeys="true"	keyProperty="id" databaseId="mysql">
+		INSERT INTO `tbl_employee` 
+		(`last_name`, `gender`, `email`) 
+		VALUES 
+		(#{lastName},#{gender}, #{email})
+	</insert>
+	
+	<insert id="addEmp"
+		databaseId="oracle">
+		<!-- 
+			selectKey:查出来的主键值封装给javaBean的哪个属性
+			order="BEFORE":当前sql在插入sql之前运行
+					AFTER:当前sql在插入sql之后运行，获取当前序列值currval
+			resultType:查出的数据的返回值类型
+			BEFORE运行顺序：
+				先运行selectKey查询seq_id值封装给javaBean的id属性
+				在运行插入的sql;就可以取出id属性对应的值
+			 AFTER运行顺序：
+			 	先运行插入sql(从序列中取出新值作为id)；
+			 	再运行selectKey查询id的sql；
+		 -->
+		<selectKey keyProperty="seq_id" order="BEFORE" resultType="Integer" >
+			<!-- 编写查询主键的sql语句 -->
+			select SEQ.nextval from dual
+		</selectKey>
+		INSERT INTO `tbl_employee` 
+		(`id`,`last_name`, `gender`, `email`) 
+		VALUES 
+		(#{seq_id},#{lastName},#{gender}, #{email})
+	</insert>
+	
+	<!-- public void updateEmp(Employee employee); -->
+	<update id="updateEmp">
+		UPDATE `tbl_employee` 
+		SET 
+		`last_name`=#{lastName}, 
+		`gender`=#{gender}, `email`=#{email}
+		WHERE `id`=#{id}
+	</update>
+	
+	<!-- public void deleteEmpById(Employee employee) -->
+	<delete id="deleteEmpById">
+		delete from tbl_employee where id=#{id}
+	</delete>
+	
+	<!-- public Employee getEmpByMap(Map<String, Object> map); -->
+	<select id="getEmpByMap" resultType="employee" databaseId="mysql">
+		select * from tbl_employee where id = #{id}
+	</select>
+</mapper>
