@@ -162,7 +162,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	 <insert id="addEmps" databaseId="mysql">
 	 	<foreach collection="emps" item="emp" separator=";">
 	 		INSERT INTO `tbl_employee` 
-		 	(`last_name`, `gender`, `email`, `d_id`)
+		 	(
+		 		<!-- 引入外部定义的sql -->
+		 		<include refid="insertColumn">
+		 			<property name="testColumn" value="asd"/>
+		 		</include>
+		 	)
 		 	VALUES
 		 	(#{emp.lastName}, #{emp.gender}, #{emp.email}, #{emp.dept.id})
 	 	</foreach>
@@ -219,4 +224,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	  		</if>
 	  	</if>
 	  </select>
+	  
+	  <!-- 
+	  	抽取可重用的sql片段。方便后面引用 
+	  	1、sql抽取：经常将要查询的列名，或者插入用的列明抽取出来方便引用
+	  	2、include来引用已经抽取的sql；
+	  	3、include还可以自定义一些property,sql标签内部就能使用自定义的熟悉
+	  		include-property取值的正确方式${prop}，
+	  		#{不能使用这种方式}
+	  	-->
+	  <sql id="insertColumn">
+	  	<if test="_databaseId=='mysql'">
+	  	`last_name`, `gender`, `email`, `d_id`
+	  	</if>
+	  </sql>
+	  
+	  <!-- 
+	  	1、使用select标签定义调用存储过程
+	  	2、statementType="CALLABLE":表示要调用存储过程 
+	   -->
+	  <select id="getPageByProcedure" statementType="CALLABLE" databaseId="oracle">
+	  	{call hello_test(
+	  		#{start,mode=IN,jdbctype=INTEGER},
+	  		#{end,mode=IN,jdbctype=INTEGER"},
+	  		#{count,mode=OUT,jdbctype=INTEGER},
+	  		#{end,mode=OUT,jdbctype=CURSOR,javaType=ResultSet,resultMap=PageEmp},
+	  	)}
+	  </select>
+	  <resultMap type="com.atguigu.mybatis.bean.Employee" id="PageEmp">
+	  	<id column="AAA_id" property="id"/>
+	  	<id column="EMAIL" property="email"/>
+	  </resultMap>
+	  
+	  
 </mapper>

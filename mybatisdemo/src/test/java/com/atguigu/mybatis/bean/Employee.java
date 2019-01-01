@@ -1,8 +1,13 @@
 package com.atguigu.mybatis.bean;
 
+import java.io.Serializable;
 
-public class Employee {
+public class Employee implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private String lastName;
 	private String email;
